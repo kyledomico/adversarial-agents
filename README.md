@@ -1,4 +1,4 @@
-# Adversarial Agents
+# Adversarial Agents: Black-Box Evasion Attacks with Reinforcement Learning
 
 This repository contains code and resources for training and evaluating adversarial agents against victim models in a controlled environment. The following instructions will guide you through setting up the environment, training victim models, training adversarial agents, and evaluating their performance.
 
