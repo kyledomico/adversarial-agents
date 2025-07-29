@@ -23,19 +23,17 @@ def get_args():
     Parses command-line arguments.
     """
     parser = argparse.ArgumentParser(description='PyTorch Square Attack Benchmark on Raw Images')
-    parser.add_argument('--model', type=str, required=True,
+    parser.add_argument('--model', type=str, default='resnet50',
                         choices=['resnet50', 'efficientnet_b0', 'vit_b_16', 'mobilenet_v3_large'],
                         help='Model architecture')
     parser.add_argument('--dataset', type=str, required=True,
                         choices=['cifar10', 'svhn'],
                         help='Dataset to use for validation')
-    parser.add_argument('--model_path', type=str, required=True,
-                        help='Path to the saved .pth model file')
     parser.add_argument('--batch_size', type=int, default=32,
                         help='Input batch size for testing (default: 32)')
-    parser.add_argument('--data_dir', type=str, default='./data',
+    parser.add_argument('--data_dir', type=str, default='./dataset',
                         help='Directory to download data (default: ./data)')
-    parser.add_argument('--eps', type=float, default=0.3,
+    parser.add_argument('--epsilon', type=float, default=0.35,
                         help='Epsilon value for the Square attack (default: 0.3)')
     parser.add_argument('--n_queries', type=int, default=1000, 
                         help='Number of queries for the Square attack (default: 1500)')
@@ -108,7 +106,8 @@ def main():
     val_loader, num_classes = get_data(args.dataset, args.data_dir, args.batch_size)
 
     # 1. Load the entire model directly from the path.
-    base_model = get_model(args.model, num_classes, args.model_path, device)
+    model_path = './victim_models/' + args.dataset + '+resnet50.pth'
+    base_model = get_model(args.model, num_classes, model_path, device)
     
     # 2. Define the preprocessing steps
     preprocess = nn.Sequential(
@@ -124,7 +123,7 @@ def main():
 
     # 4. Initialize the attack on the full model.
     #    The attack object itself does not need to be moved to the device.
-    atk = torchattacks.Square(full_model, verbose=False, eps=args.eps, n_queries=args.n_queries, norm='L2')
+    atk = torchattacks.Square(full_model, verbose=False, eps=args.epsilon, n_queries=args.n_queries, norm='L2')
     print(f"Initialized Attack: {atk}")
 
     # Benchmark loop
@@ -159,9 +158,9 @@ def main():
     attack_success_rate = 100 * successes / total
 
     print("\n--- Benchmark Results (Attacking Raw Images) ---")
-    print(f"Model Path:      {args.model_path}")
+    print(f"Model Path:      {model_path}")
     print(f"Dataset:         {args.dataset}")
-    print(f"Epsilon:         {args.eps}")
+    print(f"Epsilon:         {args.epsilon}")
     print(f"Number of Queries: {args.n_queries}")
     print("-" * 25)
     print(f"Clean Accuracy:  {clean_accuracy:.2f}%")
