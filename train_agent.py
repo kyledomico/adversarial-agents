@@ -119,5 +119,9 @@ with open('learning_results/episodic.csv', 'w') as f:
 # Train the adversarial agent
 adversarial_agent.train(steps=args.training_steps)
 
+# Make sure the agents directory exists
+if not os.path.exists('agents'):
+    os.makedirs('agents')
+
 # Save the attacker policy to a file - {args.label}.pth
 torch.save(adversarial_agent.model.policy.state_dict(), './agents/{}.pth'.format(args.label))
